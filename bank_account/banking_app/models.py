@@ -1,3 +1,6 @@
 from django.db import models
 
-# Create your models here.
+class Account(models.Model):
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    balance = models.DecimalField(decimal_places=2, default=0)
