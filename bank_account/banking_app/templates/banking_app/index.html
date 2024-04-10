@@ -1,0 +1,13 @@
+{% extends "banking_app/base_generic.html" %}
+
+{% block body %}
+{% if account_list %}
+    <ul>
+        {% for account in account_list %}
+        <li>{{ account.first_name }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No accounts</p>
+{% endif %}
+{% endblock %}
