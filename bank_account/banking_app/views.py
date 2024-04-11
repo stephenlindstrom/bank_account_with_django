@@ -1,8 +1,10 @@
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.template import loader
 
 from .models import Account
 
+@login_required
 def index(request):
     account_list  = Account.objects.all()
 
