@@ -6,7 +6,7 @@ from .models import Account
 def index(request):
     account_list  = Account.objects.all()
 
-    num_visits = request.session.get('num_visits', 0)
+    num_visits = request.session.get('num_visits', 1)
     request.session['num_visits'] = num_visits + 1
 
     template = loader.get_template("banking_app/index.html")
