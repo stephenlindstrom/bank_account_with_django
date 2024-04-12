@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -23,9 +24,17 @@ def balance(request, account_id):
     return HttpResponse("You're looking at account %s." % account_id)
 
 def register(request):
-    return render(request, "banking_app/register.html")
-
-def registered(request):
     if request.method == 'POST':
         username = request.POST.get('username')
-        return HttpResponse(username)
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm-password')
+
+        if password != confirm_password:
+            return HttpResponse("Passwords do not match.")
+        else:
+            User = get_user_model()
+            User.objects.create_user(username, '', password)
+            return HttpResponse("New account created.")
+    else:
+        return render(request, "banking_app/register.html")
+        
