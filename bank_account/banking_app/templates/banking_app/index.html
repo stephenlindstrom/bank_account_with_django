@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% if account_list %}
+{% if account %}
     <ul>
-        {% for account in account_list %}
         <li>{{ account.first_name }}</li>
-        {% endfor %}
+        <li>{{ account.last_name }}</li>
+        <li>{{ account.balance }}</li>
     </ul>
 {% else %}
-    <p>No accounts</p>
+    <p>No account information</p>
 {% endif %}
     <p> 
         You have visited this page {{ num_visits }} time{{ num_visits|pluralize }}.

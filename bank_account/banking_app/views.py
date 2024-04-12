@@ -6,14 +6,14 @@ from .models import Account
 
 @login_required
 def index(request):
-    account_list  = Account.objects.all()
+    account  = Account.objects.get(owner=request.user)
 
     num_visits = request.session.get('num_visits', 1)
     request.session['num_visits'] = num_visits + 1
 
     template = loader.get_template("banking_app/index.html")
     context = {
-                "account_list": account_list,
+                "account": account,
                 "num_visits": num_visits,
                }
 
