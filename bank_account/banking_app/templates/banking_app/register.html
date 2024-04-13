@@ -4,12 +4,16 @@
     <h1>Registration Form</h1>
     <form method="post" action="{% url 'register' %}">
         {% csrf_token %}
+        <label for="first-name">First name:</label><br>
+        <input type="text" id="first-name" name="first-name"><br>
+        <label for="last-name">Last name:</label><br>
+        <input type="text" id="last-name" name="last-name"><br>
         <label for="username">Username:</label><br>
         <input type="text" id="username" name="username"><br>
         <label for="password">Password:</label><br>
-        <input type="text" id="password" name="password"><br>
+        <input type="password" id="password" name="password"><br>
         <label for="confirm-password">Confirm Password:</label><br>
-        <input type="text" id="confirm-password" name="confirm-password"><br>
+        <input type="password" id="confirm-password" name="confirm-password"><br>
         <input type="submit" value="Register">
     </form>
 {% endblock %}

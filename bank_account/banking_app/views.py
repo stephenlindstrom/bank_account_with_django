@@ -25,6 +25,8 @@ def balance(request, account_id):
 
 def register(request):
     if request.method == 'POST':
+        first_name = request.POST.get('first-name')
+        last_name = request.POST.get('last-name')
         username = request.POST.get('username')
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm-password')
@@ -33,7 +35,8 @@ def register(request):
             return HttpResponse("Passwords do not match.")
         else:
             User = get_user_model()
-            User.objects.create_user(username, '', password)
+            user = User.objects.create_user(username, '', password)
+            Account.objects.create(first_name=first_name, last_name=last_name, balance = 0, owner = user)
             return HttpResponse("New account created.")
     else:
         return render(request, "banking_app/register.html")
