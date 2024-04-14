@@ -1,10 +1,14 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
-from django.shortcuts import render
+from django.db.models import F
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render, redirect
 from django.template import loader
 
+from .forms import DepositForm
+
 from .models import Account
+
 
 @login_required
 def index(request):
@@ -20,8 +24,10 @@ def index(request):
 
     return render(request, "banking_app/index.html", context)
 
+
 def balance(request, account_id):
     return HttpResponse("You're looking at account %s." % account_id)
+
 
 def register(request):
     if request.method == 'POST':
@@ -37,7 +43,21 @@ def register(request):
             User = get_user_model()
             user = User.objects.create_user(username, '', password)
             Account.objects.create(first_name=first_name, last_name=last_name, balance = 0, owner = user)
-            return HttpResponse("New account created.")
+            return redirect('login')
     else:
         return render(request, "banking_app/register.html")
         
+@login_required
+def deposit(request):
+    if request.method == 'POST':
+        form = DepositForm(request.POST)
+        if form.is_valid():
+            account = Account.objects.get(owner=request.user)
+            account.balance = F("balance") + form.cleaned_data["deposit_amount"]
+            account.save()
+            return redirect('index')
+
+    else:
+        form = DepositForm()
+        
+    return render(request, "banking_app/deposit.html", {"form": form})
