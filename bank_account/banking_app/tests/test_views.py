@@ -20,7 +20,7 @@ class DepositViewTest(TestCase):
         response = self.client.get(reverse('deposit'))
         self.assertRedirects(response, '/accounts/login/?next=/banking_app/deposit/')
     
-    def test_redirect_if_not_logged_in(self):
+    def test_redirect_if_logged_in(self):
         login = self.client.login(username='testuser1', password='1X<ISRUkw+tuK')
         response = self.client.get(reverse('deposit'))
 
@@ -32,4 +32,14 @@ class DepositViewTest(TestCase):
 
         # Check that we used correct template
         self.assertTemplateUsed(response, 'banking_app/deposit.html')
+
+    def test_redirects_to_index_on_success(self):
+        login = self.client.login(username='testuser1', password='1X<ISRUkw+tuK')
+        response = self.client.post(reverse('deposit'), {'deposit_amount': 12.50})
+        self.assertRedirects(response, reverse('index'))
+
+    def test_form_invalid_deposit(self):
+        self.client.login(username='testuser1', password='1X<ISRUkw+tuK')
+        response = self.client.post(reverse('deposit'), {'deposit_amount': 'ten'})
+        self.assertFormError(response.context['form'], 'deposit_amount', 'Enter a number.')
 
