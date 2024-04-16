@@ -43,3 +43,28 @@ class DepositViewTest(TestCase):
         response = self.client.post(reverse('deposit'), {'deposit_amount': 'ten'})
         self.assertFormError(response.context['form'], 'deposit_amount', 'Enter a number.')
 
+class WithdrawViewTest(TestCase):
+    def setUp(self):
+        test_user = User.objects.create_user(username='testuser', password='rfg5Hiu&Eq')
+        Account.objects.create(first_name='Test', last_name='User', balance=0, owner=test_user)
+
+    def test_user_not_logged_in(self):
+        response = self.client.get(reverse('withdraw'))
+        self.assertRedirects(response, "/accounts/login/?next=/banking_app/withdraw/")
+
+    def test_user_logged_in(self):
+        self.client.login(username='testuser', password='rfg5Hiu&Eq')
+        response = self.client.get(reverse('withdraw'))
+
+        self.assertEqual(str(response.context['user']), 'testuser')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "banking_app/withdraw.html")
+
+    def test_redirect_to_index_on_success(self):
+        self.client.login(username='testuser', password='rfg5Hiu&Eq')
+        response = self.client.post(reverse('withdraw'), {"withdraw_amount": 0})
+        self.assertRedirects(response, reverse('index'))
+
+
+
+

@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.template import loader
 
-from .forms import DepositForm
+from .forms import DepositForm, WithdrawForm
 
 from .models import Account
 
@@ -61,3 +61,17 @@ def deposit(request):
         form = DepositForm()
         
     return render(request, "banking_app/deposit.html", {"form": form})
+
+@login_required
+def withdraw(request):
+    if request.method == 'POST':
+        form = WithdrawForm(request.POST)
+        if form.is_valid():
+            account = Account.objects.get(owner=request.user)
+            account.balance = F("balance") - form.cleaned_data["withdraw_amount"]
+            account.save()
+            return redirect('index')
+    else:
+        form = WithdrawForm()
+        
+    return render(request, "banking_app/withdraw.html", {"form": form})
