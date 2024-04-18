@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db.models import F
@@ -80,7 +81,7 @@ def withdraw(request):
                     return redirect('index')
             
             except InsufficientFundsException:
-                return HttpResponse("Insufficient funds")
+                messages.error(request, "Insufficient funds")
     else:
         form = WithdrawForm()
         

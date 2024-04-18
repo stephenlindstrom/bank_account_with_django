@@ -69,7 +69,7 @@ class WithdrawViewTest(TestCase):
     def test_invalid_withdraw_amount(self):
         self.client.login(username='testuser', password='rfg5Hiu&Eq')
         response = self.client.post(reverse('withdraw'), {"withdraw_amount": 10})
-        self.assertContains(response, "Insufficient funds", status_code=200)
+        self.assertRedirects(response, reverse('withdraw'))
 
 
 

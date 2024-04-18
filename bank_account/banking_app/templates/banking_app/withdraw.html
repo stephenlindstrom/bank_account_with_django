@@ -7,4 +7,17 @@
     <input type="submit" value="Submit">
 
 </form>
+<script>
+    function showAlert() {
+        alert("Insufficient funds")
+    }
+</script>
+{% if messages %}
+<script>
+    showAlert()
+</script>
+{% for message in messages %}
+{% endfor %}
+{% endif %}
+
 {% endblock %}
