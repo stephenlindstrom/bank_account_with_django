@@ -1,5 +1,6 @@
 from banking_app.forms import DepositForm
 from banking_app.models import Account
+from banking_app.exceptions import InsufficientFundsException
 
 
 from django.contrib.auth import get_user_model
@@ -64,6 +65,11 @@ class WithdrawViewTest(TestCase):
         self.client.login(username='testuser', password='rfg5Hiu&Eq')
         response = self.client.post(reverse('withdraw'), {"withdraw_amount": 0})
         self.assertRedirects(response, reverse('index'))
+
+    def test_invalid_withdraw_amount(self):
+        self.client.login(username='testuser', password='rfg5Hiu&Eq')
+        response = self.client.post(reverse('withdraw'), {"withdraw_amount": 10})
+        self.assertContains(response, "Insufficient funds", status_code=200)
 
 
 

@@ -9,6 +9,8 @@ from .forms import DepositForm, WithdrawForm
 
 from .models import Account
 
+from .exceptions import InsufficientFundsException
+
 
 @login_required
 def index(request):
@@ -68,9 +70,17 @@ def withdraw(request):
         form = WithdrawForm(request.POST)
         if form.is_valid():
             account = Account.objects.get(owner=request.user)
-            account.balance = F("balance") - form.cleaned_data["withdraw_amount"]
-            account.save()
-            return redirect('index')
+            account.balance = account.balance - form.cleaned_data["withdraw_amount"]
+            
+            try:
+                if account.balance < 0:
+                    raise InsufficientFundsException ("Insufficient funds")
+                else:
+                    account.save()
+                    return redirect('index')
+            
+            except InsufficientFundsException:
+                return HttpResponse("Insufficient funds")
     else:
         form = WithdrawForm()
         
