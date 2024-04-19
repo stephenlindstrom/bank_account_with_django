@@ -71,6 +71,25 @@ class WithdrawViewTest(TestCase):
         response = self.client.post(reverse('withdraw'), {"withdraw_amount": 10})
         self.assertRedirects(response, reverse('withdraw'))
 
+class IndexViewTest(TestCase):
+    def setUp(self):
+        test_user = User.objects.create_user(username='testuser', password='rfg5Hiu&Eq')
+
+    def test_account_does_not_exist(self):
+        self.client.login(username='testuser', password='rfg5Hiu&Eq')
+        response = self.client.get(reverse('index'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b'No account information available')
+
+    def test_account_does_exist(self):
+        test_user = User.objects.get(username='testuser')
+        Account.objects.create(first_name='Test', last_name='User', balance=0, owner=test_user)
+        self.client.login(username='testuser', password='rfg5Hiu&Eq')
+        response = self.client.get(reverse('index'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'banking_app/index.html')
+
+
 
 
 

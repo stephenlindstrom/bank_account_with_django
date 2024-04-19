@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'six',
 ]
 
 MIDDLEWARE = [
@@ -136,9 +137,11 @@ LOGIN_REDIRECT_URL = '/banking_app/'
 LOGIN_URL = '/accounts/login/'
 
 load_dotenv()
-
+"""
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
-EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True 
+"""
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
