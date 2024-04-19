@@ -13,7 +13,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
 from .exceptions import InsufficientFundsException
 
-from .forms import DepositForm, WithdrawForm, RegistrationForm
+from .forms import DepositForm, WithdrawForm, RegistrationForm, AccountForm
 
 from .models import Account
 
@@ -121,8 +121,9 @@ def signup(request):
             email.send()
             return HttpResponse('Please confirm your email address to complete the registration')
     else:
-        form = RegistrationForm()
-    return render(request, 'banking_app/signup.html', {'form': form})
+        registration_form = RegistrationForm()
+        account_form = AccountForm()
+    return render(request, 'banking_app/signup.html', {'registration_form': registration_form, 'account_form': account_form})
 
 def activate(request, uidb64, token):
     User = get_user_model()
