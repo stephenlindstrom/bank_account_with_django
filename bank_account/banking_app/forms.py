@@ -2,6 +2,8 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
+from banking_app.models import Account
+
 class DepositForm(forms.Form):
     deposit_amount = forms.DecimalField(min_value=0, decimal_places=2)
 
@@ -13,3 +15,8 @@ class RegistrationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('username', 'email', 'password1', 'password2')
+
+class AccountForm(forms.ModelForm):
+    class Meta:
+        model = Account
+        fields = ['first_name', 'last_name']
