@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-
 {% block content %}
 <form action="{% url 'withdraw' %}" method="post">
     {% csrf_token %}
@@ -7,17 +6,22 @@
     <input type="submit" value="Submit">
 
 </form>
-<script>
-    function showAlert() {
-        alert("Insufficient funds")
-    }
-</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 {% if messages %}
-<script>
-    showAlert()
+<script>Swal.fire('Insufficient funds')</script>
+{% for message in messages %}
+{% endfor %}
+{% endif %}
+<!--
+<script src="{% static 'scripts.js' %}"></script>
+<button onclick="insufficientFundsAlert()">Click</button>-->
+<!--
+{% if messages %}
+<script type="text/javascript" src="{% static 'scripts.js' %}">
 </script>
 {% for message in messages %}
 {% endfor %}
 {% endif %}
+-->
 
 {% endblock %}
