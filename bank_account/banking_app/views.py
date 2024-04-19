@@ -46,6 +46,7 @@ def register(request):
             User = get_user_model()
             user = User.objects.create_user(username, '', password)
             Account.objects.create(first_name=first_name, last_name=last_name, balance = 0, owner = user)
+            messages.success(request, "New account registered.")
             return redirect('login')
     else:
         return render(request, "banking_app/register.html")
