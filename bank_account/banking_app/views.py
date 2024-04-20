@@ -26,17 +26,11 @@ from .token import account_activation_token
 def index(request):
     try:
         account  = Account.objects.get(owner=request.user)
+    
     except Account.DoesNotExist:
         return HttpResponse('No account information available')
-    num_visits = request.session.get('num_visits', 1)
-    request.session['num_visits'] = num_visits + 1
 
-    context = {
-                "account": account,
-                "num_visits": num_visits,
-               }
-
-    return render(request, "banking_app/index.html", context)
+    return render(request, "banking_app/index.html", {"account": account})
 
 
 def balance(request, account_id):
