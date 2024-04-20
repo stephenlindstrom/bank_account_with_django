@@ -101,11 +101,15 @@ def withdraw(request):
 
 def signup(request):
     if request.method == 'POST':
-        form = RegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
+        account_form = AccountForm(request.POST, prefix='account_form')
+        registration_form = RegistrationForm(request.POST, prefix='registration_form')
+        if all([account_form.is_valid(), registration_form.is_valid()]):
+            user = registration_form.save(commit=False)
             user.is_active = False
             user.save()
+            account = account_form.save(commit=False)
+            account.owner = user
+            account.save()
             current_site = get_current_site(request)
             mail_subject = 'Activation link has been sent to your email address'
             message = render_to_string('banking_app/acc_active_email.html', {
@@ -114,15 +118,15 @@ def signup(request):
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                 'token': account_activation_token.make_token(user),
             })
-            to_email = form.cleaned_data.get('email')
+            to_email = registration_form.cleaned_data.get('email')
             email = EmailMessage(
                 mail_subject, message, to=[to_email]
             )
             email.send()
             return HttpResponse('Please confirm your email address to complete the registration')
     else:
-        registration_form = RegistrationForm()
-        account_form = AccountForm()
+        registration_form = RegistrationForm(prefix='registration_form')
+        account_form = AccountForm(prefix='account_form')
     return render(request, 'banking_app/signup.html', {'registration_form': registration_form, 'account_form': account_form})
 
 def activate(request, uidb64, token):

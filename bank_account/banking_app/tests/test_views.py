@@ -89,6 +89,14 @@ class IndexViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'banking_app/index.html')
 
+class SignupViewTest(TestCase):
+    def setUp(self):
+        pass
+    def test_successful_registration(self):
+        response = self.client.post(reverse('signup'), {'first_name': 'Test', 'last_name': 'User','username': 'testuser', 'email': 'testuser@email.com', 'password1': 'rfg5Hiu&Eq', 'password2': 'rfg5Hiu&Eq'})
+        self.assertEqual(response.status_code, 200)
+        
+
 
 
 
