@@ -1,0 +1,6 @@
+{% extends 'registration/base_registration.html' %}
+
+{% block content %}
+<p>Account verification email was delivered. Please click on included link to verify account before attempting to login.</p>
+<a href="{% url 'login' %}">Login</a>
+{% endblock %}

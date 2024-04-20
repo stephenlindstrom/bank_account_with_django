@@ -10,5 +10,5 @@ urlpatterns = [
     path("deposit/", views.deposit, name="deposit"),
     path("withdraw/", views.withdraw, name="withdraw"),
     path('signup/', views.signup, name='signup'),
-    path('activate/<slug:uidb64>/<slug:token>/', views.activate, name='activate'),
+    path('activate/<uidb64>/<token>/', views.activate, name='activate'),
 ]

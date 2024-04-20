@@ -42,25 +42,6 @@ def index(request):
 def balance(request, account_id):
     return HttpResponse("You're looking at account %s." % account_id)
 
-
-def register(request):
-    if request.method == 'POST':
-        first_name = request.POST.get('first-name')
-        last_name = request.POST.get('last-name')
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        confirm_password = request.POST.get('confirm-password')
-
-        if password != confirm_password:
-            return HttpResponse("Passwords do not match.")
-        else:
-            User = get_user_model()
-            user = User.objects.create_user(username, '', password)
-            Account.objects.create(first_name=first_name, last_name=last_name, balance = 0, owner = user)
-            messages.success(request, "New account registered.")
-            return redirect('login')
-    else:
-        return render(request, "banking_app/register.html")
         
 @login_required
 def deposit(request):
@@ -76,6 +57,7 @@ def deposit(request):
         form = DepositForm()
         
     return render(request, "banking_app/deposit.html", {"form": form})
+
 
 @login_required
 def withdraw(request):
@@ -98,6 +80,7 @@ def withdraw(request):
         form = WithdrawForm()
         
     return render(request, "banking_app/withdraw.html", {"form": form})
+
 
 def signup(request):
     if request.method == 'POST':
@@ -123,11 +106,12 @@ def signup(request):
                 mail_subject, message, to=[to_email]
             )
             email.send()
-            return HttpResponse('Please confirm your email address to complete the registration')
+            return render(request, 'banking_app/signup_complete.html')
     else:
         registration_form = RegistrationForm(prefix='registration_form')
         account_form = AccountForm(prefix='account_form')
     return render(request, 'banking_app/signup.html', {'registration_form': registration_form, 'account_form': account_form})
+
 
 def activate(request, uidb64, token):
     User = get_user_model()
@@ -139,7 +123,6 @@ def activate(request, uidb64, token):
     if user is not None and account_activation_token.check_token(user, token):
         user.is_active = True
         user.save()
-        #Account.objects.create(first_name=first_name, last_name=last_name, balance = 0, owner = user)
-        return HttpResponse('Thank you for your email confirmation. Now you can login your account.')
+        return HttpResponse('Thank you for your email confirmation. Now you can login to your account.')
     else:
         return HttpResponse('Activation link is invalid')
