@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
+from django.db import transaction
 from django.db.models import F
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -12,7 +13,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
 from .forms import DepositForm, WithdrawForm, RegistrationForm, AccountForm
 
-from .models import Account
+from .models import Account, Transaction
 
 from .token import account_activation_token
 
@@ -37,7 +38,9 @@ def deposit(request):
         if form.is_valid():
             account = Account.objects.get(owner=request.user)
             account.balance = F("balance") + form.cleaned_data["deposit_amount"]
-            account.save()
+            with transaction.atomic():
+                account.save()
+                Transaction.objects.create(type='deposit', amount=form.cleaned_data["deposit_amount"], account=account)
             return redirect('index')
 
     else:
@@ -58,7 +61,9 @@ def withdraw(request):
                 messages.error(request, "Insufficient funds")
             
             else:
-                account.save()
+                with transaction.atomic():
+                    account.save()
+                    Transaction.objects.create(type='withdraw', amount=form.cleaned_data["withdraw_amount"], account=account)
                 return redirect('index')
     
     else:
