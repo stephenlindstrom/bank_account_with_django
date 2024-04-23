@@ -1,6 +1,5 @@
 from banking_app.forms import DepositForm
 from banking_app.models import Account
-from banking_app.exceptions import InsufficientFundsException
 
 
 from django.contrib.auth import get_user_model
@@ -12,16 +11,13 @@ User = get_user_model()
 class DepositViewTest(TestCase):
     def setUp(self):
         test_user1 = User.objects.create_user(username='testuser1', password='1X<ISRUkw+tuK')
-        test_user2 = User.objects.create_user(username='testuser2', password='2HJ1vRV0Z&3iD')
-        
-        test_account1 = Account.objects.create(first_name='Test', last_name='User1', balance=0, owner=test_user1)
-        test_account2 = Account.objects.create(first_name='Test', last_name='User2', balance=0, owner=test_user2)
+        Account.objects.create(first_name='Test', last_name='User1', balance=0, owner=test_user1)
     
     def test_redirect_if_not_logged_in(self):
         response = self.client.get(reverse('deposit'))
         self.assertRedirects(response, '/accounts/login/?next=/banking_app/deposit/')
     
-    def test_redirect_if_logged_in(self):
+    def test_get_deposit_if_logged_in(self):
         login = self.client.login(username='testuser1', password='1X<ISRUkw+tuK')
         response = self.client.get(reverse('deposit'))
 
@@ -43,11 +39,19 @@ class DepositViewTest(TestCase):
         self.client.login(username='testuser1', password='1X<ISRUkw+tuK')
         response = self.client.post(reverse('deposit'), {'deposit_amount': 'ten'})
         self.assertFormError(response.context['form'], 'deposit_amount', 'Enter a number.')
+    
+    def test_deposits_amount_in_account(self):
+        self.client.login(username='testuser1', password='1X<ISRUkw+tuK')
+        self.client.post(reverse('deposit'), {'deposit_amount': 12.50})
+        user = User.objects.get(username='testuser1')
+        account = Account.objects.get(owner=user)
+        self.assertEqual(account.balance, 12.50)
+
 
 class WithdrawViewTest(TestCase):
     def setUp(self):
         test_user = User.objects.create_user(username='testuser', password='rfg5Hiu&Eq')
-        Account.objects.create(first_name='Test', last_name='User', balance=0, owner=test_user)
+        Account.objects.create(first_name='Test', last_name='User', balance=100, owner=test_user)
 
     def test_user_not_logged_in(self):
         response = self.client.get(reverse('withdraw'))
@@ -63,13 +67,21 @@ class WithdrawViewTest(TestCase):
 
     def test_redirect_to_index_on_success(self):
         self.client.login(username='testuser', password='rfg5Hiu&Eq')
-        response = self.client.post(reverse('withdraw'), {"withdraw_amount": 0})
+        response = self.client.post(reverse('withdraw'), {"withdraw_amount": 50})
         self.assertRedirects(response, reverse('index'))
 
     def test_invalid_withdraw_amount(self):
         self.client.login(username='testuser', password='rfg5Hiu&Eq')
-        response = self.client.post(reverse('withdraw'), {"withdraw_amount": 10})
-        self.assertRedirects(response, reverse('withdraw'))
+        response = self.client.post(reverse('withdraw'), {"withdraw_amount": 200})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'banking_app/withdraw.html')
+    
+    def test_amount_withdrawn_from_account(self):
+        self.client.login(username='testuser', password='rfg5Hiu&Eq')
+        self.client.post(reverse('withdraw'), {'withdraw_amount': 75})
+        user = User.objects.get(username='testuser')
+        account = Account.objects.get(owner=user)
+        self.assertEqual(account.balance, 25)
 
 class IndexViewTest(TestCase):
     def setUp(self):
@@ -92,11 +104,21 @@ class IndexViewTest(TestCase):
 class SignupViewTest(TestCase):
     def setUp(self):
         pass
-    def test_successful_registration(self):
-        response = self.client.post(reverse('signup'), {'first_name': 'Test', 'last_name': 'User','username': 'testuser', 'email': 'testuser@email.com', 'password1': 'rfg5Hiu&Eq', 'password2': 'rfg5Hiu&Eq'})
-        self.assertEqual(response.status_code, 200)
-        
 
+    def test_successful_registration(self):
+        response = self.client.post(reverse('signup'), {'account_form-first_name': 'Test', 'account_form-last_name': 'User', 'registration_form-username': 'testuser', 'registration_form-email': 'testuser@email.com', 'registration_form-password1': 'rfg5Hiu&Eq', 'registration_form-password2': 'rfg5Hiu&Eq'})
+        user = User.objects.get(username='testuser')
+        account = Account.objects.get(owner=user)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'banking_app/signup_complete.html')
+        
+        self.assertEqual(account.first_name, 'Test')
+        self.assertEqual(account.last_name, 'User')
+        self.assertEqual(user.username, 'testuser')
+        self.assertEqual(user.email, 'testuser@email.com')
+        self.assertTrue(user.check_password('rfg5Hiu&Eq'))
+    
 
 
 

@@ -4,14 +4,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
 from django.db.models import F
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.template import loader
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-
-from .exceptions import InsufficientFundsException
 
 from .forms import DepositForm, WithdrawForm, RegistrationForm, AccountForm
 
@@ -31,10 +28,6 @@ def index(request):
         return HttpResponse('No account information available')
 
     return render(request, "banking_app/index.html", {"account": account})
-
-
-def balance(request, account_id):
-    return HttpResponse("You're looking at account %s." % account_id)
 
         
 @login_required
@@ -61,15 +54,13 @@ def withdraw(request):
             account = Account.objects.get(owner=request.user)
             account.balance = account.balance - form.cleaned_data["withdraw_amount"]
             
-            try:
-                if account.balance < 0:
-                    raise InsufficientFundsException ("Insufficient funds")
-                else:
-                    account.save()
-                    return redirect('index')
-            
-            except InsufficientFundsException:
+            if account.balance < 0:
                 messages.error(request, "Insufficient funds")
+            
+            else:
+                account.save()
+                return redirect('index')
+    
     else:
         form = WithdrawForm()
         
