@@ -116,3 +116,10 @@ def activate(request, uidb64, token):
         return HttpResponse('Thank you for your email confirmation. Now you can login to your account.')
     else:
         return HttpResponse('Activation link is invalid')
+    
+
+@login_required
+def transactions(request):
+    account = Account.objects.get(owner=request.user)
+    transactions = Transaction.objects.filter(account=account)
+    return render(request, 'banking_app/transactions.html', {'transactions': transactions})

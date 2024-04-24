@@ -1,5 +1,5 @@
 from banking_app.forms import DepositForm
-from banking_app.models import Account
+from banking_app.models import Account, Transaction
 
 
 from django.contrib.auth import get_user_model
@@ -118,6 +118,20 @@ class SignupViewTest(TestCase):
         self.assertEqual(user.username, 'testuser')
         self.assertEqual(user.email, 'testuser@email.com')
         self.assertTrue(user.check_password('rfg5Hiu&Eq'))
+
+
+class TransactionViewTest(TestCase):
+    def setUp(self):
+        user = User.objects.create_user(username='testcase', password='rfg5Hiu&Eq')
+        Account.objects.create(first_name='Test', last_name='User', owner=user)
+
+    def test_transactions_template_used_logged_in_user(self):
+        self.client.login(username='testcase', password='rfg5Hiu&Eq')
+        user = User.objects.get(username='testcase')
+        account = Account.objects.get(owner=user)
+        transactions = Transaction.objects.filter(account=account)
+        self.client.get(reverse('transactions'), {'transactions': transactions})
+        self.assertTemplateUsed('banking_app/transactions.html')
     
 
 
