@@ -130,8 +130,9 @@ class TransactionViewTest(TestCase):
         user = User.objects.get(username='testcase')
         account = Account.objects.get(owner=user)
         transactions = Transaction.objects.filter(account=account)
-        self.client.get(reverse('transactions'), {'transactions': transactions})
+        response = self.client.get(reverse('transactions'), {'transactions': transactions})
         self.assertTemplateUsed('banking_app/transactions.html')
+        self.assertEqual(response.status_code, 200)
     
 
 

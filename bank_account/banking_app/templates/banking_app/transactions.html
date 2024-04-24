@@ -1,7 +1,22 @@
 {% extends 'base.html' %}
 
-<ul>
+{% block content %}
+<table>
+    <tr>
+        <th>Type</th>
+        <th>Amount</th>
+        <th>Timestamp</th>
+    </tr>
 {% for transaction in transactions %}
-    <li>{{ transaction }}</li>
+    <tr>
+        <td>{{ transaction.type }}</td>
+        {% if transaction.type == "withdraw" %}
+        <td>-{{ transaction.amount }}</td>
+        {% else %}
+        <td>+{{ transaction.amount }}</td>
+        {% endif %}
+        <td>{{ transaction.timestamp }}</td>    
+    </tr>
 {% endfor %}
-</ul>
+</table>
+{% endblock %}
