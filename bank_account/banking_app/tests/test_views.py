@@ -110,8 +110,7 @@ class SignupViewTest(TestCase):
         user = User.objects.get(username='testuser')
         account = Account.objects.get(owner=user)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'banking_app/signup_complete.html')
+        self.assertEqual(response.status_code, 302)
         
         self.assertEqual(account.first_name, 'Test')
         self.assertEqual(account.last_name, 'User')

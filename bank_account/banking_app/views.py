@@ -97,12 +97,15 @@ def signup(request):
                 mail_subject, message, to=[to_email]
             )
             email.send()
-            return render(request, 'banking_app/signup_complete.html')
+            return redirect('signup_complete')
     else:
         registration_form = RegistrationForm(prefix='registration_form')
         account_form = AccountForm(prefix='account_form')
     return render(request, 'banking_app/signup.html', {'registration_form': registration_form, 'account_form': account_form})
 
+
+def signup_complete(request):
+    return render(request, 'banking_app/signup_complete.html')
 
 def activate(request, uidb64, token):
     User = get_user_model()
