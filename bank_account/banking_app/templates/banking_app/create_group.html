@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Create Group</h1>
+<form method='post'>
+    {% csrf_token %}
+    {% for field in group_creation_form %}
+    <p>
+        {{ field.label_tag }}<br>
+        {{ field }}
+    </p>
+    {% endfor %}
+    <button type="submit">Submit</button>
+</form>
+{% endblock %}

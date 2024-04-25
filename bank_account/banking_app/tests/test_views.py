@@ -132,6 +132,16 @@ class TransactionViewTest(TestCase):
         response = self.client.get(reverse('transactions'), {'transactions': transactions})
         self.assertTemplateUsed('banking_app/transactions.html')
         self.assertEqual(response.status_code, 200)
+
+
+class GroupCreationViewTest(TestCase):
+    def setUp(self):
+        user = User.objects.create_user(username='testcase', password='rfg5Hiu&Eq')
+    
+    def test_successful_get_request(self):
+        self.client.login(username='testcase', password='rfg5Hiu&Eq')
+        response = self.client.get(reverse('create_group'))
+        self.assertEqual(response.status_code, 200)
     
 
 

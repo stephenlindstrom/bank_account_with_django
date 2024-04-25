@@ -12,7 +12,7 @@ from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
-from .forms import DepositForm, WithdrawForm, RegistrationForm, AccountForm
+from .forms import DepositForm, WithdrawForm, RegistrationForm, AccountForm, GroupCreationForm
 
 from .models import Account, Transaction
 
@@ -134,4 +134,8 @@ def join_group(request):
 
 @login_required
 def create_group(request):
-    pass
+    if request.method == 'POST':
+        pass
+    else:
+        group_creation_form = GroupCreationForm()
+    return render(request, 'banking_app/create_group.html', {'group_creation_form': group_creation_form})
