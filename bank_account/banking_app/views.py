@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
 from django.db import transaction
@@ -123,3 +124,11 @@ def transactions(request):
     account = Account.objects.get(owner=request.user)
     transactions = Transaction.objects.filter(account=account)
     return render(request, 'banking_app/transactions.html', {'transactions': transactions})
+
+@login_required
+def join_group(request):
+    request.user.groups.add
+
+@login_required
+def create_group(request):
+    pass

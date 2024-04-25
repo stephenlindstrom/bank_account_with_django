@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 
 from banking_app.models import Account
 
@@ -20,3 +20,9 @@ class AccountForm(forms.ModelForm):
     class Meta:
         model = Account
         fields = ['first_name', 'last_name']
+
+class GroupCreationForm(forms.ModelForm):
+    class Meta:
+        model = Group
+        fields = ['name']
+        labels = {'name': ('Group name'),}

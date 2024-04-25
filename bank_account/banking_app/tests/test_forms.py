@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from banking_app.forms import DepositForm, WithdrawForm, RegistrationForm, AccountForm
+from banking_app.forms import DepositForm, WithdrawForm, RegistrationForm, AccountForm, GroupCreationForm
 
 class DepositFormTest(TestCase):
     def test_deposit_form_decimal_field(self):
@@ -28,3 +28,9 @@ class AccountFormTest(TestCase):
         form = AccountForm()
         self.assertTrue(form.fields['first_name'].label is None or form.fields['first_name'].label == 'First name')
         self.assertTrue(form.fields['last_name'].label is None or form.fields['last_name'].label == 'Last name')
+
+
+class GroupCreationFormTest(TestCase):
+    def test_group_creation_form_field_labels(self):
+        form = GroupCreationForm()
+        self.assertTrue(form.fields['name'].label is None or form.fields['name'].label == 'Group name')
