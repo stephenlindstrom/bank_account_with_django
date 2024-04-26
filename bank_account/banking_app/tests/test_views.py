@@ -147,6 +147,13 @@ class GroupCreationViewTest(TestCase):
         self.client.login(username='testcase', password='rfg5Hiu&Eq')
         response = self.client.post(reverse('create_group'), {'name': 'Test Group'})
         self.assertRedirects(response, reverse('index'))
+
+    def test_add_group_to_user(self):
+        self.client.login(username='testcase', password='rfg5Hiu&Eq')
+        self.client.post(reverse('create_group'), {'name': 'Test Group'})
+        user = User.objects.get(username='testcase')
+        self.assertTrue(user.groups.filter(name='Test Group').exists())
+        
     
 
 

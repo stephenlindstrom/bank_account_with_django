@@ -137,7 +137,8 @@ def create_group(request):
     if request.method == 'POST':
         group_creation_form = GroupCreationForm(request.POST)
         if group_creation_form.is_valid():
-            group_creation_form.save()
+            group = group_creation_form.save()
+            request.user.groups.add(group)
             return redirect('index')
     else:
         group_creation_form = GroupCreationForm()
