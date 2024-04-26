@@ -135,7 +135,10 @@ def join_group(request):
 @login_required
 def create_group(request):
     if request.method == 'POST':
-        pass
+        group_creation_form = GroupCreationForm(request.POST)
+        if group_creation_form.is_valid():
+            group_creation_form.save()
+            return redirect('index')
     else:
         group_creation_form = GroupCreationForm()
     return render(request, 'banking_app/create_group.html', {'group_creation_form': group_creation_form})

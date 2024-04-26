@@ -142,6 +142,11 @@ class GroupCreationViewTest(TestCase):
         self.client.login(username='testcase', password='rfg5Hiu&Eq')
         response = self.client.get(reverse('create_group'))
         self.assertEqual(response.status_code, 200)
+
+    def test_successful_post_request(self):
+        self.client.login(username='testcase', password='rfg5Hiu&Eq')
+        response = self.client.post(reverse('create_group'), {'name': 'Test Group'})
+        self.assertRedirects(response, reverse('index'))
     
 
 
