@@ -1,8 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 
-from banking_app.models import Account
+from banking_app.models import Account, Organization, Membership
 
 class DepositForm(forms.Form):
     deposit_amount = forms.DecimalField(min_value=0, decimal_places=2)
@@ -23,6 +23,6 @@ class AccountForm(forms.ModelForm):
 
 class GroupCreationForm(forms.ModelForm):
     class Meta:
-        model = Group
+        model = Organization
         fields = ['name']
         labels = {'name': ('Group name'),}

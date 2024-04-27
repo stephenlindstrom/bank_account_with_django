@@ -18,3 +18,14 @@ class Transaction(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
 
 
+class Organization(models.Model):
+    name = models.CharField(max_length=50)
+
+
+class Membership(models.Model):
+    member = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20)
+    invited_email_address = models.EmailField()
+
+

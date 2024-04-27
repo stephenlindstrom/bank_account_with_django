@@ -10,6 +10,13 @@
 {% else %}
     <p>No account information</p>
 {% endif %}
+{% if organizations %}
+{% for organization in organizations %}
+    <ul>
+        <li>{{ organization }}</li>
+    </ul>
+{% endfor %}
+{% endif %}
     <a href="deposit/">Deposit</a>
     <a href="withdraw/">Withdraw</a>
     <a href="transactions/">View Transactions</a>

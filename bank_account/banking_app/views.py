@@ -7,14 +7,14 @@ from django.core.mail import EmailMessage
 from django.db import transaction
 from django.db.models import F
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
 from .forms import DepositForm, WithdrawForm, RegistrationForm, AccountForm, GroupCreationForm
 
-from .models import Account, Transaction
+from .models import Account, Transaction, Membership, Organization
 
 from .token import account_activation_token
 
@@ -28,8 +28,15 @@ def index(request):
     
     except Account.DoesNotExist:
         return HttpResponse('No account information available')
+    
+    organizations = []
+    if Membership.objects.filter(member=request.user).exists():
+        memberships = Membership.objects.filter(member=request.user).values_list('organization', flat=True)
+        for membership in memberships:
+            organization = Organization.objects.get(id=membership)
+            organizations.append(organization.name)
 
-    return render(request, "banking_app/index.html", {"account": account})
+    return render(request, "banking_app/index.html", {"account": account, "organizations": organizations})
 
         
 @login_required
@@ -130,7 +137,7 @@ def transactions(request):
 
 @login_required
 def join_group(request):
-    request.user.groups.add
+    pass
 
 @login_required
 def create_group(request):
@@ -138,8 +145,23 @@ def create_group(request):
         group_creation_form = GroupCreationForm(request.POST)
         if group_creation_form.is_valid():
             group = group_creation_form.save()
-            request.user.groups.add(group)
+            Membership.objects.create(member=request.user, organization=group, status='admin', invited_email_address=request.user.email)
             return redirect('index')
     else:
         group_creation_form = GroupCreationForm()
     return render(request, 'banking_app/create_group.html', {'group_creation_form': group_creation_form})
+
+
+@login_required
+def view_group(request, organization_id, organization_name):
+    organization = get_object_or_404(Organization, pk=organization_id)
+    if Membership.objects.filter(member=request.user, organization=organization).exists():
+        return HttpResponse('Success')
+    else:
+        return HttpResponse('Access denied. You are not a member of this group.')
+
+
+
+@login_required
+def invite_member_to_group(request):
+    pass

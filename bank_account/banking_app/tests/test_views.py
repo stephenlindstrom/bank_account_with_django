@@ -1,9 +1,9 @@
 from banking_app.forms import DepositForm
-from banking_app.models import Account, Transaction
+from banking_app.models import Account, Transaction, Organization, Membership
 
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from django.urls import reverse
 
 User = get_user_model()
@@ -100,6 +100,15 @@ class IndexViewTest(TestCase):
         response = self.client.get(reverse('index'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'banking_app/index.html')
+    
+    def test_organization_list_passed(self):
+        user = User.objects.get(username='testuser')
+        Account.objects.create(first_name='Test', last_name='User', balance=0, owner=user)
+        organization = Organization.objects.create(name='Test Organization')
+        Membership.objects.create(member=user, organization=organization, status='member', invited_email_address='test@email.com')
+        self.client.login(username='testuser', password='rfg5Hiu&Eq')
+        response = self.client.get(reverse('index'))
+        self.assertContains(response, 'Test Organization')
 
 class SignupViewTest(TestCase):
     def setUp(self):
@@ -136,7 +145,7 @@ class TransactionViewTest(TestCase):
 
 class GroupCreationViewTest(TestCase):
     def setUp(self):
-        user = User.objects.create_user(username='testcase', password='rfg5Hiu&Eq')
+        User.objects.create_user(username='testcase', password='rfg5Hiu&Eq')
     
     def test_successful_get_request(self):
         self.client.login(username='testcase', password='rfg5Hiu&Eq')
@@ -152,8 +161,47 @@ class GroupCreationViewTest(TestCase):
         self.client.login(username='testcase', password='rfg5Hiu&Eq')
         self.client.post(reverse('create_group'), {'name': 'Test Group'})
         user = User.objects.get(username='testcase')
-        self.assertTrue(user.groups.filter(name='Test Group').exists())
-        
+        organization = Organization.objects.get(name='Test Group')
+        self.assertTrue(Membership.objects.filter(member=user, organization=organization).exists())
+
+
+class InviteMemberViewTest(TestCase):
+    def setUp(self):
+        user = User.objects.create_user(username='testcase', password='rfg5Hiu&Eq')
+        organization = Organization.objects.create(name='Test Group')
+        Membership.objects.create(member=user, organization=organization, status='admin', invited_email_address='test@email.com')
+    
+    """
+    def test_user_member_of_organization(self):
+        self.client.login(username='testcase', password='rfg5Hiu&Eq')
+        self.client.post(reverse('invite_member'))
+    """
+
+class ViewGroupViewTest(TransactionTestCase):
+    reset_sequences = True
+
+    def setUp(self):
+        user = User.objects.create_user(username='testcase', password='rfg5Hiu&Eq')
+        Account.objects.create(first_name='Test', last_name='User', owner=user)
+    
+    def test_group_does_not_exist(self):
+        self.client.login(username='testcase', password='rfg5Hiu&Eq')
+        response = self.client.get(reverse('view_group', args=[1, 'Test_Group']))
+        self.assertEqual(response.status_code, 404)
+    
+    def test_group_exists_unauthorized_user(self):
+        Organization.objects.create(name='Test_Group')
+        self.client.login(username='testcase', password='rfg5Hiu&Eq')
+        response = self.client.get(reverse('view_group', args=[1, 'Test_Group']))
+        self.assertContains(response, 'Access denied', status_code=200)
+    
+    def test_group_exists_authorized_user(self):
+        user = User.objects.get(username='testcase')
+        organization = Organization.objects.create(name='Test_Group')
+        Membership.objects.create(member=user, organization=organization)
+        self.client.login(username='testcase', password='rfg5Hiu&Eq')
+        response = self.client.get(reverse('view_group', args=[1, 'Test_Group']))
+        self.assertEqual(response.status_code, 200)
     
 
 
