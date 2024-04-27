@@ -12,9 +12,7 @@
 {% endif %}
 {% if organizations %}
 {% for organization in organizations %}
-    <ul>
-        <li>{{ organization }}</li>
-    </ul>
+    <a href="{% url 'view_group' organization.pk organization.name %}">{{ organization.name }}</a>
 {% endfor %}
 {% endif %}
     <a href="deposit/">Deposit</a>

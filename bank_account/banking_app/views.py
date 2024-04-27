@@ -34,7 +34,7 @@ def index(request):
         memberships = Membership.objects.filter(member=request.user).values_list('organization', flat=True)
         for membership in memberships:
             organization = Organization.objects.get(id=membership)
-            organizations.append(organization.name)
+            organizations.append(organization)
 
     return render(request, "banking_app/index.html", {"account": account, "organizations": organizations})
 
@@ -154,7 +154,7 @@ def create_group(request):
 
 @login_required
 def view_group(request, organization_id, organization_name):
-    organization = get_object_or_404(Organization, pk=organization_id)
+    organization = get_object_or_404(Organization, pk=organization_id, name=organization_name)
     if Membership.objects.filter(member=request.user, organization=organization).exists():
         return HttpResponse('Success')
     else:
