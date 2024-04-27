@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% for account in accounts %}
+<p>{{account.first_name}} {{account.last_name}}</p>
+{% endfor %}
+{% endblock %}

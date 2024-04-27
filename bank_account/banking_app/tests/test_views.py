@@ -139,7 +139,7 @@ class TransactionViewTest(TestCase):
         account = Account.objects.get(owner=user)
         transactions = Transaction.objects.filter(account=account)
         response = self.client.get(reverse('transactions'), {'transactions': transactions})
-        self.assertTemplateUsed('banking_app/transactions.html')
+        self.assertTemplateUsed(response, 'banking_app/transactions.html')
         self.assertEqual(response.status_code, 200)
 
 
@@ -202,7 +202,31 @@ class ViewGroupViewTest(TransactionTestCase):
         self.client.login(username='testcase', password='rfg5Hiu&Eq')
         response = self.client.get(reverse('view_group', args=[1, 'Test_Group']))
         self.assertEqual(response.status_code, 200)
-    
+        self.assertTemplateUsed(response, 'banking_app/view_group.html')
+
+    def test_view_group_displays_members(self):
+        user = User.objects.get(username='testcase')
+        organization = Organization.objects.create(name='Test Group')
+        Membership.objects.create(member=user, organization=organization, status='member')
+        self.client.login(username='testcase', password='rfg5Hiu&Eq')
+        response = self.client.get(reverse('view_group', args=[1, 'Test Group']))
+        self.assertContains(response, 'Test User', status_code=200)
+
+    def test_view_group_displays_admins(self):        
+        user = User.objects.get(username='testcase')
+        organization = Organization.objects.create(name='Test Group')
+        Membership.objects.create(member=user, organization=organization, status='admin')
+        self.client.login(username='testcase', password='rfg5Hiu&Eq')
+        response = self.client.get(reverse('view_group', args=[1, 'Test Group']))
+        self.assertContains(response, 'Test User', status_code=200)
+
+    def test_view_group_does_not_display_invited(self):
+        user = User.objects.get(username='testcase')
+        organization = Organization.objects.create(name='Test Group')
+        Membership.objects.create(member=user, organization=organization, status='invited')
+        self.client.login(username='testcase', password='rfg5Hiu&Eq')
+        response = self.client.get(reverse('view_group', args=[1, 'Test Group']))
+        self.assertNotContains(response, 'Test User', status_code=200)
 
 
 
