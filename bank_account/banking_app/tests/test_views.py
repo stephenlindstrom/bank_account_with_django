@@ -171,11 +171,9 @@ class InviteMemberViewTest(TestCase):
         organization = Organization.objects.create(name='Test Group')
         Membership.objects.create(member=user, organization=organization, status='admin', invited_email_address='test@email.com')
     
-    """
-    def test_user_member_of_organization(self):
+    def test_user_admin_of_organization(self):
         self.client.login(username='testcase', password='rfg5Hiu&Eq')
         self.client.post(reverse('invite_member'))
-    """
 
 class ViewGroupViewTest(TransactionTestCase):
     reset_sequences = True
@@ -228,6 +226,29 @@ class ViewGroupViewTest(TransactionTestCase):
         response = self.client.get(reverse('view_group', args=[1, 'Test Group']))
         self.assertNotContains(response, 'Test User', status_code=200)
 
+    def test_displays_invite_members_form_if_admin(self):
+        user = User.objects.get(username='testcase')
+        organization = Organization.objects.create(name='Test Group')
+        Membership.objects.create(member=user, organization=organization, status='admin')
+        self.client.login(username='testcase', password='rfg5Hiu&Eq')
+        response = self.client.get(reverse('view_group', args=[1, 'Test Group']))      
+        self.assertContains(response, 'Invite member', status_code=200)  
+    
+    def test_does_not_display_invite_members_if_member(self):
+        user = User.objects.get(username='testcase')
+        organization = Organization.objects.create(name='Test Group')
+        Membership.objects.create(member=user, organization=organization, status='member')
+        self.client.login(username='testcase', password='rfg5Hiu&Eq')
+        response = self.client.get(reverse('view_group', args=[1, 'Test Group']))      
+        self.assertNotContains(response, 'Invite member', status_code=200)
+    
+    def test_does_not_display_invite_members_if_invited(self):
+        user = User.objects.get(username='testcase')
+        organization = Organization.objects.create(name='Test Group')
+        Membership.objects.create(member=user, organization=organization, status='invited')
+        self.client.login(username='testcase', password='rfg5Hiu&Eq')
+        response = self.client.get(reverse('view_group', args=[1, 'Test Group']))      
+        self.assertNotContains(response, 'Invite member', status_code=200)
 
 
 
