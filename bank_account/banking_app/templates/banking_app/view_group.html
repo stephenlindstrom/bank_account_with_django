@@ -2,6 +2,15 @@
 
 {% block content %}
 
+{% if invite_member %}
+    <form method='post' action='{% url "view_group" organization.pk organization.name %}'>
+        {% csrf_token %}
+        <label for='invite'>Invite member (enter email address):</label><br>
+        <input type='email' name='invite' id='invite'><br>
+        <button type='submit'>Invite</button>
+    </form>
+{% endif %}
+
 {% for account in accounts %}
 <p>{{account.first_name}} {{account.last_name}}</p>
 {% endfor %}

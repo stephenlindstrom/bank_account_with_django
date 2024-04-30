@@ -155,12 +155,15 @@ def create_group(request):
 @login_required
 def view_group(request, organization_id, organization_name):
     organization = get_object_or_404(Organization, pk=organization_id, name=organization_name)
+    invite_member = False
+    if Membership.objects.filter(member=request.user, organization=organization, status='admin').exists():
+        invite_member = True
     if Membership.objects.filter(member=request.user, organization=organization, status='admin').exists() or Membership.objects.filter(member=request.user, organization=organization, status='member').exists():
         members = Membership.objects.filter(organization=organization, status='admin').values_list('member', flat=True) | Membership.objects.filter(organization=organization, status='member').values_list('member', flat=True)
         accounts = []
         for member in members:
             accounts.append(Account.objects.get(owner=member))
-        return render(request, 'banking_app/view_group.html', {'accounts': accounts})
+        return render(request, 'banking_app/view_group.html', {'accounts': accounts, 'organization': organization, 'invite_member': invite_member})
     else:
         return HttpResponse('Access denied. You are not a member of this group.')
 
