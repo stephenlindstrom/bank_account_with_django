@@ -187,16 +187,33 @@ class ViewGroupViewTest(TransactionTestCase):
         response = self.client.get(reverse('view_group', args=[1, 'Test_Group']))
         self.assertEqual(response.status_code, 404)
     
-    def test_group_exists_unauthorized_user(self):
+    def test_group_exists_uninvited_user(self):
         Organization.objects.create(name='Test_Group')
         self.client.login(username='testcase', password='rfg5Hiu&Eq')
         response = self.client.get(reverse('view_group', args=[1, 'Test_Group']))
         self.assertContains(response, 'Access denied', status_code=200)
     
-    def test_group_exists_authorized_user(self):
+    def test_group_exists_invited_user(self):
         user = User.objects.get(username='testcase')
         organization = Organization.objects.create(name='Test_Group')
-        Membership.objects.create(member=user, organization=organization)
+        Membership.objects.create(member=user, organization=organization, status='invited')
+        self.client.login(username='testcase', password='rfg5Hiu&Eq')
+        response = self.client.get(reverse('view_group', args=[1, 'Test_Group']))
+        self.assertContains(response, 'Access denied', status_code=200)
+
+    def test_group_exists_admin_user(self):
+        user = User.objects.get(username='testcase')
+        organization = Organization.objects.create(name='Test_Group')
+        Membership.objects.create(member=user, organization=organization, status='admin')
+        self.client.login(username='testcase', password='rfg5Hiu&Eq')
+        response = self.client.get(reverse('view_group', args=[1, 'Test_Group']))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'banking_app/view_group.html')
+
+    def test_group_exists_member_user(self):
+        user = User.objects.get(username='testcase')
+        organization = Organization.objects.create(name='Test_Group')
+        Membership.objects.create(member=user, organization=organization, status='member')
         self.client.login(username='testcase', password='rfg5Hiu&Eq')
         response = self.client.get(reverse('view_group', args=[1, 'Test_Group']))
         self.assertEqual(response.status_code, 200)

@@ -155,7 +155,7 @@ def create_group(request):
 @login_required
 def view_group(request, organization_id, organization_name):
     organization = get_object_or_404(Organization, pk=organization_id, name=organization_name)
-    if Membership.objects.filter(member=request.user, organization=organization).exists():
+    if Membership.objects.filter(member=request.user, organization=organization, status='admin').exists() or Membership.objects.filter(member=request.user, organization=organization, status='member').exists():
         members = Membership.objects.filter(organization=organization, status='admin').values_list('member', flat=True) | Membership.objects.filter(organization=organization, status='member').values_list('member', flat=True)
         accounts = []
         for member in members:
