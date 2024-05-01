@@ -9,6 +9,7 @@ from django.db.models import F
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
@@ -17,6 +18,8 @@ from .forms import DepositForm, WithdrawForm, RegistrationForm, AccountForm, Gro
 from .models import Account, Transaction, Membership, Organization
 
 from .token import account_activation_token
+
+from urllib.parse import urlencode
 
 
 
@@ -159,11 +162,18 @@ def view_group(request, organization_id, organization_name):
     if Membership.objects.filter(member=request.user, organization=organization, status='admin').exists():
         invite_member = True
     if Membership.objects.filter(member=request.user, organization=organization, status='admin').exists() or Membership.objects.filter(member=request.user, organization=organization, status='member').exists():
+        invite_status = request.GET.get('invite')
+        if invite_status == 'fail':
+            invite = 'fail'
+        elif invite_status == 'success':
+            invite = 'success'
+        else:
+            invite = None
         members = Membership.objects.filter(organization=organization, status='admin').values_list('member', flat=True) | Membership.objects.filter(organization=organization, status='member').values_list('member', flat=True)
         accounts = []
         for member in members:
             accounts.append(Account.objects.get(owner=member))
-        return render(request, 'banking_app/view_group.html', {'accounts': accounts, 'organization': organization, 'invite_member': invite_member, 'form': InviteMemberForm()})
+        return render(request, 'banking_app/view_group.html', {'accounts': accounts, 'organization': organization, 'invite_member': invite_member, 'form': InviteMemberForm(), 'invite': invite})
     else:
         return HttpResponse('Access denied. You are not a member of this group.')
 
@@ -180,10 +190,16 @@ def invite_member_to_group(request, organization_id, organization_name):
                 invitee_username = form.cleaned_data['invitee_username']
                 if User.objects.filter(username=invitee_username).exists():
                     user = User.objects.get(username=invitee_username)
-                    Membership.objects.create(member=user, organization=organization, status='member', invited_email_address=user.email)
-                    return redirect('view_group', organization_id=organization_id, organization_name=organization_name)
+                    Membership.objects.create(member=user, organization=organization, status='invited', invited_email_address=user.email)
+                    base_url = reverse('view_group', args=[organization_id, organization_name])
+                    query_string = urlencode({'invite': 'success'})
+                    url = '{}?{}'.format(base_url, query_string)
+                    return redirect(url)
                 else:
-                    return redirect('view_group', organization_id=organization_id, organization_name=organization_name)
+                    base_url = reverse('view_group', args=[organization_id, organization_name])
+                    query_string = urlencode({'invite': 'fail'})
+                    url = '{}?{}'.format(base_url, query_string)
+                    return redirect(url)
         else:
             return HttpResponse('Only admin can invite members')
     else:

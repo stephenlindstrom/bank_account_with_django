@@ -6,6 +6,8 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase, TransactionTestCase
 from django.urls import reverse
 
+from urllib.parse import urlencode
+
 User = get_user_model()
 
 class DepositViewTest(TestCase):
@@ -197,7 +199,10 @@ class InviteMemberViewTest(TransactionTestCase):
         Membership.objects.create(member=user, organization=organization, status='admin', invited_email_address='test@email.com')
         self.client.login(username='testcase', password='rfg5Hiu&Eq')
         response = self.client.post(reverse('invite_member', args=[1, 'Test Group']), {'invitee_username': 'testinvitee'})
-        self.assertRedirects(response, reverse('view_group', args=[1, 'Test Group']))
+        base_url = reverse('view_group', args=[1, 'Test Group'])
+        query_string = urlencode({'invite': 'fail'})
+        url = '{}?{}'.format(base_url, query_string)
+        self.assertRedirects(response, url)
     
     def test_valid_invitee_username(self):
         invitee = User.objects.create_user(username='testinvitee', password='tyU&e3Fdew')
@@ -207,7 +212,10 @@ class InviteMemberViewTest(TransactionTestCase):
         Membership.objects.create(member=user, organization=organization, status='admin', invited_email_address='test@email.com')
         self.client.login(username='testcase', password='rfg5Hiu&Eq')
         response = self.client.post(reverse('invite_member', args=[1, 'Test Group']), {'invitee_username': 'testinvitee'})
-        self.assertRedirects(response, reverse('view_group', args=[1, 'Test Group']))
+        base_url = reverse('view_group', args=[1, 'Test Group'])
+        query_string = urlencode({'invite': 'success'})
+        url = '{}?{}'.format(base_url, query_string)
+        self.assertRedirects(response, url)
 
 
 class ViewGroupViewTest(TransactionTestCase):

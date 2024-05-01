@@ -10,6 +10,12 @@
     </form>
 {% endif %}
 
+{% if invite == "fail" %}
+    <p>Username not valid</p>
+{% elif invite == "success" %}
+    <p>User was invited to group</p>
+{% endif %}
+
 {% for account in accounts %}
 <p>{{account.first_name}} {{account.last_name}}</p>
 {% endfor %}
