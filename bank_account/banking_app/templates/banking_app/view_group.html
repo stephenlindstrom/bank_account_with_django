@@ -5,7 +5,7 @@
 {% if invite_member %}
     <form method='post' action='{% url "view_group" organization.pk organization.name %}'>
         {% csrf_token %}
-        <label for='invite'>Invite member (enter email address):</label><br>
+        <label for='invite'>Invite member (enter username):</label><br>
         <input type='email' name='invite' id='invite'><br>
         <button type='submit'>Invite</button>
     </form>
