@@ -198,6 +198,16 @@ class InviteMemberViewTest(TransactionTestCase):
         self.client.login(username='testcase', password='rfg5Hiu&Eq')
         response = self.client.post(reverse('invite_member', args=[1, 'Test Group']), {'invitee_username': 'testinvitee'})
         self.assertRedirects(response, reverse('view_group', args=[1, 'Test Group']))
+    
+    def test_valid_invitee_username(self):
+        invitee = User.objects.create_user(username='testinvitee', password='tyU&e3Fdew')
+        Account.objects.create(first_name='Test', last_name='Invitee', owner=invitee)
+        user = User.objects.get(username='testcase')
+        organization = Organization.objects.create(name='Test Group')
+        Membership.objects.create(member=user, organization=organization, status='admin', invited_email_address='test@email.com')
+        self.client.login(username='testcase', password='rfg5Hiu&Eq')
+        response = self.client.post(reverse('invite_member', args=[1, 'Test Group']), {'invitee_username': 'testinvitee'})
+        self.assertRedirects(response, reverse('view_group', args=[1, 'Test Group']))
 
 
 class ViewGroupViewTest(TransactionTestCase):

@@ -180,7 +180,8 @@ def invite_member_to_group(request, organization_id, organization_name):
                 invitee_username = form.cleaned_data['invitee_username']
                 if User.objects.filter(username=invitee_username).exists():
                     user = User.objects.get(username=invitee_username)
-                    Membership.objects.create(member=user, organization=organization, status='invited', invited_email_address=user.email)
+                    Membership.objects.create(member=user, organization=organization, status='member', invited_email_address=user.email)
+                    return redirect('view_group', organization_id=organization_id, organization_name=organization_name)
                 else:
                     return redirect('view_group', organization_id=organization_id, organization_name=organization_name)
         else:
