@@ -170,5 +170,12 @@ def view_group(request, organization_id, organization_name):
 
 
 @login_required
-def invite_member_to_group(request):
-    pass
+def invite_member_to_group(request, organization_id, organization_name):
+    organization = get_object_or_404(Organization, pk=organization_id, name=organization_name)
+    if request.method == 'POST':
+        if Membership.objects.filter(member=request.user, organization=organization, status='admin').exists():
+            pass
+        else:
+            return HttpResponse('Only admin can invite members')
+    else:
+        return HttpResponse('Must go to group page to invite members')

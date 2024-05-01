@@ -165,15 +165,32 @@ class GroupCreationViewTest(TestCase):
         self.assertTrue(Membership.objects.filter(member=user, organization=organization).exists())
 
 
-class InviteMemberViewTest(TestCase):
+class InviteMemberViewTest(TransactionTestCase):
+    reset_sequences = True
+
     def setUp(self):
         user = User.objects.create_user(username='testcase', password='rfg5Hiu&Eq')
-        organization = Organization.objects.create(name='Test Group')
-        Membership.objects.create(member=user, organization=organization, status='admin', invited_email_address='test@email.com')
-    
-    def test_user_admin_of_organization(self):
+        Account.objects.create(first_name='Test', last_name='User', owner=user)
+
+    def test_group_does_not_exist(self):
         self.client.login(username='testcase', password='rfg5Hiu&Eq')
-        self.client.post(reverse('invite_member'))
+        response = self.client.get(reverse('invite_member', args=[1, 'Test Group']))
+        self.assertEqual(response.status_code, 404)
+    
+    def test_user_not_admin(self):
+        user = User.objects.get(username='testcase')
+        organization = Organization.objects.create(name='Test Group')
+        Membership.objects.create(member=user, organization=organization, status='member', invited_email_address='test@email.com')
+        self.client.login(username='testcase', password='rfg5Hiu&Eq')
+        response = self.client.post(reverse('invite_member', args=[1, 'Test Group']), {'invite': 'testinvitee'})
+        self.assertContains(response, 'Only admin can invite members', status_code=200)
+    
+    def test_get_method(self):
+        Organization.objects.create(name='Test Group')
+        self.client.login(username='testcase', password='rfg5Hiu&Eq')
+        response = self.client.get(reverse('invite_member', args=[1, 'Test Group']))
+        self.assertContains(response, 'Must go to group page to invite members', status_code=200)
+
 
 class ViewGroupViewTest(TransactionTestCase):
     reset_sequences = True
