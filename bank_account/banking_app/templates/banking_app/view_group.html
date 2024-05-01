@@ -5,8 +5,7 @@
 {% if invite_member %}
     <form method='post' action='{% url "invite_member" organization.pk organization.name %}'>
         {% csrf_token %}
-        <label for='invite'>Invite member (enter username):</label><br>
-        <input type='email' name='invite' id='invite'><br>
+        {{ form }}
         <button type='submit'>Invite</button>
     </form>
 {% endif %}

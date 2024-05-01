@@ -26,3 +26,6 @@ class GroupCreationForm(forms.ModelForm):
         model = Organization
         fields = ['name']
         labels = {'name': ('Group name'),}
+
+class InviteMemberForm(forms.Form):
+    invitee_username = forms.CharField(label='Invitee username', max_length=100)

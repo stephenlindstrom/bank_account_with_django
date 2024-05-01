@@ -191,6 +191,14 @@ class InviteMemberViewTest(TransactionTestCase):
         response = self.client.get(reverse('invite_member', args=[1, 'Test Group']))
         self.assertContains(response, 'Must go to group page to invite members', status_code=200)
 
+    def test_invalid_invitee_username(self):
+        user = User.objects.get(username='testcase')
+        organization = Organization.objects.create(name='Test Group')
+        Membership.objects.create(member=user, organization=organization, status='admin', invited_email_address='test@email.com')
+        self.client.login(username='testcase', password='rfg5Hiu&Eq')
+        response = self.client.post(reverse('invite_member', args=[1, 'Test Group']), {'invitee_username': 'testinvitee'})
+        self.assertRedirects(response, reverse('view_group', args=[1, 'Test Group']))
+
 
 class ViewGroupViewTest(TransactionTestCase):
     reset_sequences = True

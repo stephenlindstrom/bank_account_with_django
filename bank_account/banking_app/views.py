@@ -12,7 +12,7 @@ from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
-from .forms import DepositForm, WithdrawForm, RegistrationForm, AccountForm, GroupCreationForm
+from .forms import DepositForm, WithdrawForm, RegistrationForm, AccountForm, GroupCreationForm, InviteMemberForm
 
 from .models import Account, Transaction, Membership, Organization
 
@@ -163,7 +163,7 @@ def view_group(request, organization_id, organization_name):
         accounts = []
         for member in members:
             accounts.append(Account.objects.get(owner=member))
-        return render(request, 'banking_app/view_group.html', {'accounts': accounts, 'organization': organization, 'invite_member': invite_member})
+        return render(request, 'banking_app/view_group.html', {'accounts': accounts, 'organization': organization, 'invite_member': invite_member, 'form': InviteMemberForm()})
     else:
         return HttpResponse('Access denied. You are not a member of this group.')
 
@@ -174,7 +174,15 @@ def invite_member_to_group(request, organization_id, organization_name):
     organization = get_object_or_404(Organization, pk=organization_id, name=organization_name)
     if request.method == 'POST':
         if Membership.objects.filter(member=request.user, organization=organization, status='admin').exists():
-            pass
+            form = InviteMemberForm(request.POST)
+            if form.is_valid():
+                User = get_user_model()
+                invitee_username = form.cleaned_data['invitee_username']
+                if User.objects.filter(username=invitee_username).exists():
+                    user = User.objects.get(username=invitee_username)
+                    Membership.objects.create(member=user, organization=organization, status='invited', invited_email_address=user.email)
+                else:
+                    return redirect('view_group', organization_id=organization_id, organization_name=organization_name)
         else:
             return HttpResponse('Only admin can invite members')
     else:
